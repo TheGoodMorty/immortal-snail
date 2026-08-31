@@ -39,7 +39,8 @@ jobs:
 
       - name: Build publish matrix from versions.json
         id: versions
-        run: echo "matrix=$(jq -c '{include: .}' versions.json)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "matrix=$(jq -c '{include: .}' versions.json)" >> "$GITHUB_OUTPUT"
 
   publish:
     name: Build & publish (Minecraft ${{ matrix.mc }})
