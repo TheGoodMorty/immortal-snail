@@ -74,7 +74,7 @@ jobs:
         run: test -f "${{ matrix.dir }}/build/libs/immortalsnail-${MOD_VERSION}.jar"
 
       - name: Publish to Modrinth / CurseForge / GitHub
-        uses: Kir-Antipov/mc-publish@v3.3
+        uses: Kira-NT/mc-publish@v3
         with:
           modrinth-id: PoROc13w
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
@@ -84,13 +84,12 @@ jobs:
 
           github-tag: ${{ inputs.version-tag || github.ref_name }}
 
-          # 1.21.x: Loom remaps the jar, so this IS the production jar.
-          # 26.x: unobfuscated, the plain jar IS the final jar.
-          files-primary: ${{ matrix.dir }}/build/libs/immortalsnail-${{ env.MOD_VERSION }}.jar
-          fail-on-unmatched-files: true
+          # All jars from the build, minus dev/sources/javadoc artifacts.
+          files: |
+            ${{ matrix.dir }}/build/libs/!(*-@(dev|sources|javadoc)).jar
 
           name: Immortal Snail ${{ env.MOD_VERSION }} for Minecraft ${{ matrix.mc }}
-          version-number: ${{ env.MOD_VERSION }}+mc${{ matrix.mc }}
+          version: ${{ env.MOD_VERSION }}+mc${{ matrix.mc }}
           version-type: release
           changelog-file: ${{ matrix.dir }}/CHANGELOG.md
 
