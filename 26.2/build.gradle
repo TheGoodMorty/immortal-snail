@@ -1,0 +1,93 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.mod_group_id
+
+base {
+    archivesName = project.mod_id
+}
+
+repositories {
+    maven { url 'https://maven.shedaniel.me/' }
+    maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://maven.blamejared.com/' }
+    mavenCentral()
+}
+
+dependencies {
+    // Minecraft 26.1+ is unobfuscated: there are no mappings, and the new
+    // net.fabricmc.fabric-loom plugin does NOT remap Minecraft or mods.
+    // Use the standard implementation/compileOnly configurations instead of
+    // the old modImplementation/modCompileOnly, and jar instead of remapJar.
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Cloth Config (required for TOML config)
+    implementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+
+    // JEI (Just Enough Items) — optional runtime dependency.
+    // Compile against the official JEI API artifacts (Jared's maven) but do
+    // NOT bundle them. Users install JEI from Modrinth/CurseForge; our plugin
+    // class is loaded via ServiceLoader only when JEI is present at runtime.
+    compileOnly "mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}"
+    compileOnly "mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}"
+}
+
+// Enable Fabric Loom's split source sets so client code under src/client/java
+// is compiled into the main jar with the clientOnly() dependency configuration
+// applied.
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "immortalsnail" {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.client)
+        }
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version,
+               "mod_id": project.mod_id,
+               "mod_name": project.mod_name,
+               "mod_description": project.mod_description,
+               "mod_authors": project.mod_authors,
+               "mod_license": project.mod_license
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    from("LICENSE") {
+        rename { String fileName -> "${fileName}_${project.base.archivesName.get()}"}
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.mod_id
+            from components.java
+        }
+    }
+
+    repositories {
+        // Add Maven repositories here if publishing to one.
+    }
+}

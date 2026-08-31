@@ -1,0 +1,26 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = uri('https://maven.fabricmc.net/')
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = uri('https://maven.fabricmc.net/')
+        }
+        maven {
+            name = 'shedaniel'
+            url = uri('https://maven.shedaniel.me/')
+        }
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'immortalsnail'

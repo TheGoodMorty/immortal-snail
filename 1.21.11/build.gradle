@@ -1,0 +1,93 @@
+plugins {
+    id 'fabric-loom' version '1.13.1'
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.mod_group_id
+
+base {
+    archivesName = project.mod_id
+}
+
+repositories {
+    maven { url 'https://maven.shedaniel.me/' }
+    maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://maven.blamejared.com/' }
+    mavenCentral()
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file.
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Cloth Config (required for TOML config)
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+
+    // JEI (Just Enough Items) — optional runtime dependency.
+    // We compile against an API-only jar extracted from the full JEI jar
+    // (committed to this repo; JEI's published API artifacts are built with
+    // a newer Loom than ours and cannot be processed as mods by Loom 1.13).
+    // modCompileOnly: we compile against JEI's API but do NOT bundle it.
+    // Users install JEI from Modrinth/CurseForge. Our plugin class is loaded
+    // via ServiceLoader only when JEI is present at runtime.
+    modCompileOnly files("libs/jei-api-intermediate.jar")
+}
+
+// Enable Fabric Loom's split source sets so client code under src/client/java
+// is compiled into the main jar with the clientOnly() dependency configuration
+// applied.
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "immortalsnail" {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.client)
+        }
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version,
+               "mod_id": project.mod_id,
+               "mod_name": project.mod_name,
+               "mod_description": project.mod_description,
+               "mod_authors": project.mod_authors,
+               "mod_license": project.mod_license
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") {
+        rename { String fileName -> "${fileName}_${project.base.archivesName.get()}"}
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.mod_id
+            from components.java
+        }
+    }
+
+    repositories {
+        // Add Maven repositories here if publishing to one.
+    }
+}

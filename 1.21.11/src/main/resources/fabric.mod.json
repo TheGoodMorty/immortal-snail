@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["${mod_authors}"],
+  "contact": {
+    "homepage": "https://example.com/",
+    "sources": "https://example.com/"
+  },
+  "license": "${mod_license}",
+  "icon": "assets/immortalsnail/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "server": ["com.yourname.immortalsnail.ImmortalSnail"],
+    "client": ["com.yourname.immortalsnail.client.ImmortalSnailClient"]
+  },
+  "mixins": ["immortalsnail.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*",
+    "cloth-config": "*"
+  },
+  "suggests": {
+    "jei": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "badges": ["library"]
+    }
+  }
+}

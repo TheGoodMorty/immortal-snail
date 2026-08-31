@@ -1,0 +1,49 @@
+# Secrets — never commit
+.env
+
+# Gradle / build outputs
+.gradle/
+build/
+out/
+.gradle-home/
+classes/
+deobf/
+remappedSrc/
+
+# Runtime dirs & logs
+run/
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Extracted-jar junk at the 1.21.11 project root (leftovers, not build inputs)
+1.21.11/META-INF/
+1.21.11/net/
+1.21.11/fabric.mod.json
+1.21.11/fabric-entity-events-v1.mixins.json
+
+# Old build artifact copies
+1.21.11/Finished Mod/
+26.2/Finished Mod/
+
+# Dependency caches created for local experiments
+26.2/.gradle-home/
+
+# JEI artifacts that must not be redistributed (JEI is All-Rights-Reserved)
+# Only the extracted API subset for the 1.21.11 build is vendored.
+1.21.11/libs/jei-*-sources.jar
+1.21.11/libs/jei-sources-clean.jar
+26.2/libs/
