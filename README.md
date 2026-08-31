@@ -76,6 +76,20 @@ The workflow builds both versions and:
 You can also trigger a publish without pushing from the Actions tab
 (workflow_dispatch - optionally set the release tag).
 
+### Adding a new Minecraft version
+
+The publish workflow is driven by `versions.json` at the repo root. Adding
+a port needs **no workflow changes**:
+
+1. Create a new project folder next to `1.21.11/` and `26.2/`
+   (copy the closest existing one and adjust gradle.properties + build.gradle).
+2. Add one object to `versions.json`:
+   `{ "dir": "<folder>", "mc": "<game version>", "java": "<build JDK>" }`
+3. Add a `<folder>/CHANGELOG.md` - its first section becomes the changelog
+   on Modrinth, CurseForge and the GitHub release.
+
+The next pushed tag builds and publishes the new version automatically.
+
 ## License
 
 MIT — see 1.21.11/LICENSE / 26.2/LICENSE.
