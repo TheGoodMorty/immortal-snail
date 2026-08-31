@@ -1,74 +1,78 @@
 # Immortal Snail
 
-A server-side take on the classic thought experiment: take infinite wealth and immortality, and one snail is dispatched to finish you off. It moves ~1 block per minute. It cannot be stopped, damaged, distracted, or reasoned with. The moment it touches you, your account is banned from the world — permanently.
+This mod brings the classic immortality snail thought experiment to Minecraft servers. Upon joining, players receive near-infinite wealth and invulnerability to normal damage, but an unkillable snail spawns far away and slowly tracks down the nearest target at roughly 1 block per minute. If it reaches you, your account is permanently banned from the server.
 
-Works on Fabric for **Minecraft 1.21.11** and **Minecraft 26.2**. Install on the server **and** on each client (the bargain screen is a custom menu that needs the client mod to render).
+Requires Fabric for **Minecraft 1.21.11** and **Minecraft 26.2**. This mod must be installed on both the server **and** each client to render the custom bargain interface.
 
 ## The bargain
 
-The first time you ever join, two things happen immediately:
+The first time a player joins the world, two actions trigger:
 
-1. You receive **starter gear**: a shulker box containing 12 max-enchanted pieces of gear — the full netherite set, sword, pickaxe, axe, shovel, bow (Power V/Infinity/Flame/Punch II), crossbow, trident, mace, and elytra — plus a Totem of Undying, 4 enchanted golden apples, 16 ender pearls, 64 golden carrots, and ten stacks of building materials (stone, logs, torches, gold/diamond/emerald/iron blocks, obsidian, food, redstone). A separate shulker with 128 firework rockets is included for elytra travel. Anything that doesn't fit in your inventory drops at your feet.
-2. Ten ticks later, **The Bargain** screen opens. Two empty shulker boxes (27 slots each) and a scrollable item picker are shown; the picker contains every registered item. Left-click a picker item to place a full max stack in the next empty slot; right-click to place it in the slot you've selected (yellow highlight); right-click a slot to empty it. **Clear** resets both boxes; **Confirm** submits. If you have JEI installed you can also drag ingredients straight from JEI into the slots, and hovering shows normal tooltips; JEI positions its sidebar around the screen automatically.
+1. You receive **starter gear**: a shulker box holding 12 max-enchanted gear items (full netherite armor set, sword, pickaxe, axe, shovel, bow with Power V/Infinity/Flame/Punch II, crossbow, trident, mace, and elytra), a Totem of Undying, 4 enchanted golden apples, 16 ender pearls, 64 golden carrots, and 10 stacks of building materials (stone, logs, torches, gold/diamond/emerald/iron blocks, obsidian, food, and redstone). An additional shulker box containing 128 firework rockets is provided for flight. Overflow items drop to the ground.
+2. Ten ticks after joining, **The Bargain** menu appears. It presents two empty 27-slot shulker boxes alongside a scrollable item picker displaying every registered item in the game. Left-click an item in the picker to put a max stack into the next available slot; right-click an item to assign it to the currently selected slot (marked with a yellow highlight); right-click a slot to clear it. Select **Clear** to empty both boxes, or **Confirm** to lock in your choices. When JEI is installed, you can drag items directly from the sidebar into slots, view standard tooltips, and let JEI automatically arrange its sidebar around the interface.
 
-On confirm you're handed the two filled shulkers as real items and the bargain is recorded permanently in the world save. There is no decline — you can log out to postpone it, but the screen reopens (and the starter kit is re-delivered) on every subsequent login until you submit.
+Confirming hands over the two filled shulker boxes as physical items and permanently writes the selection to the world save. The menu cannot be declined; logging off merely postpones it, and logging back in re-delivers the starter kit and reopens the prompt until completed.
 
-A small list of items can never be placed into the bargain shulkers: command blocks (all variants plus the minecart), structure block and structure void, jigsaw, barrier, light, and spawner. This list is fixed in the mod as a safeguard against trivially breaking the world.
+A small set of technical items cannot be picked during the bargain: all command block variants (including the minecart variant), structure blocks, structure voids, jigsaw blocks, barriers, light blocks, and spawners. This restriction is hardcoded to prevent server corruption.
 
-## Immortality, and what it costs
+## Immortality rules
 
-Once you've joined a world running this mod, you are functionally unkillable: **all damage from any source other than the snail is cancelled** — mobs, lava, falling, the void, suffocation, and hunger (your food and saturation are pinned at full every tick, so you never starve). This applies to everyone, including the singleplayer host.
+Players in a modded world gain functional invulnerability: **all damage from any source other than the snail is negated**, including mobs, lava, falling, void damage, suffocation, and starvation (food and saturation levels remain locked at maximum). This applies to all players, including singleplayer hosts.
 
-Exactly one thing kills you: **the snail's touch**. The snail deals 1,000,000 damage on contact — enough to bypass everything. Totems of Undying work against it by default (vanilla behavior); if the server owner sets \`totemsWorkAgainstSnail = false\`, any totems in your inventory are silently removed the moment a lethal snail blow lands, so nothing can save you.
+The only lethal threat is **the snail's touch**. The snail deals 1,000,000 damage upon contact, bypassing standard protection. Totems of Undying function against this attack by default. If the server administrator sets `totemsWorkAgainstSnail = false`, any Totems in your inventory are automatically cleared the moment the snail strikes, preventing survival.
 
 ## The snail
 
-One snail spawns the first time anyone joins, 5,000–50,000 blocks from world origin in the overworld. It has one target rule: the closest player on the server who isn't in spectator mode. It walks straight toward them:
+A single snail spawns when the first player joins, generating between 5,000 and 50,000 blocks away from the world origin in the Overworld. It continuously pathfinds toward the nearest non-spectator player.
 
-- **Speed:** 1 block per minute by default. At spawn distance that gives you a day-to-weeks head start; use \`/snail locate\` to see the live ETA.
-- **Terrain:** it climbs walls and ceilings spider-style at 3× its ground speed and sticks to surfaces over ledges, releasing only when the target is below it. It falls with normal gravity and re-climbs.
-- **Obstacles:** if it has made zero progress for 60 seconds, it starts chewing through whatever block is in its path — block particles visible to everyone nearby — at 1 block per minute. Bedrock, obsidian, and end portal frames are on its no-eat list; everything else is food. Both the whitelist/blacklist and the eat-rate are configurable.
-- **Persistence:** it never despawns, is fully invulnerable, ignores knockback, and its chunk is force-loaded so it keeps crawling even with nobody nearby. If its entity is somehow lost, the mod rebuilds it at the last saved position. State is stored in \`<world>/immortalsnail/spawned.dat\` and survives restarts.
-- **The catch:** contact triggers 1,000,000 damage. The player is added to the **vanilla ban list** — permanently, source "The Snail", reason configurable (\`banMessage\`, default "The snail caught you.") — and disconnected with that message.
+* **Speed:** Moves at 1 block per minute by default. This starting distance provides a significant grace period. Run `/snail locate` to check its current ETA.
+* **Terrain:** Climbs walls and ceilings like a spider at 3× ground speed, remaining attached over ledges until the target drops below it. It falls with standard gravity and resumes climbing.
+* **Obstacles:** If stuck without moving for 60 seconds, it begins eating through obstruction blocks at a rate of 1 block per minute, creating visible break particles. By default, bedrock, obsidian, and end portal frames cannot be destroyed. Mining speed, whitelists, and blacklists can be modified in the configuration.
+* **Persistence:** Invulnerable, immune to knockback, and never despawns. Its chunk stays force-loaded so it advances even when no players are nearby. If the entity is accidentally removed, the mod restores it at its last saved position. Snail data persists across server restarts in `<world>/immortalsnail/spawned.dat`.
+* **Ban mechanics:** Contact triggers 1,000,000 damage. The killed player is added to the **vanilla ban list** under source "The Snail" with a custom message (`banMessage`, defaults to "The snail caught you.") and kicked from the server.
 
-While the snail walks and chews it emits block-break particles, and its name plate (just "The Snail") is always visible, so being close to it is something you'll notice.
+The snail constantly displays the nameplate "The Snail" and emits block-break particles while moving or digging, allowing players to spot it when close.
 
 ## Admin commands
 
-All are op level 2+; non-ops can be granted access through the \`commandAllowedPlayers\` list (names or UUIDs, case-insensitive).
+Requires operator status (level 2+). Non-ops can be given access via the `commandAllowedPlayers` configuration option (accepts names or UUIDs, case-insensitive).
 
 | Command | Effect |
-|---------|--------|
-| \`/snail status\` | Position, distance from world origin, configured speed, current nearest player, and whether block breaking is on. |
-| \`/snail locate\` | Position, the player it's chasing, distance, and an arrival ETA in minutes. |
-| \`/snail remove\` | Removes the snail entirely (until the next respawn command). |
-| \`/snail respawn here\` | Respawns it at your feet. |
-| \`/snail respawn nearby\` | Respawns it 5 blocks ahead of where you're facing. |
-| \`/snail respawn random\` | Re-rolls a random spawn point within the configured distance range. |
-| \`/snail respawn <x y z>\` | Respawns it at a coordinate; supports \`~\` relative coordinates. |
-| \`/snail reload\` | Reloads \`config/immortalsnail-common.toml\` without a restart. |
+| --- | --- |
+| `/snail status` | Displays position, origin distance, set speed, target player, and block-breaking status. |
+| `/snail locate` | Displays position, current target player, distance, and estimated arrival time in minutes. |
+| `/snail remove` | Removes the snail entity from the world until respawned. |
+| `/snail respawn here` | Respawns the snail directly at your position. |
+| `/snail respawn nearby` | Respawns the snail 5 blocks in front of your direction. |
+| `/snail respawn random` | Generates a new spawn location within the configured distance range. |
+| `/snail respawn <x y z>` | Respawns the snail at specific coordinates (supports `~` relative positioning). |
+| `/snail reload` | Reloads `config/immortalsnail-common.toml` without restarting the server. |
 
 ## Configuration
 
-\`config/immortalsnail-common.toml\`, created on first run, live-reloadable with \`/snail reload\`:
+Configuration file located at `config/immortalsnail-common.toml` (generated on first boot, reloadable via `/snail reload`):
 
-| Section — Key | Default | What it does |
-|---------------|---------|--------------|
-| \`snail\` — \`minDistance\` / \`maxDistance\` | 5000 / 50000 | Spawn distance range from world origin. |
-| \`snail\` — \`speedBlocksPerMinute\` | 1.0 | Ground speed. |
-| \`snail\` — \`canClimbWalls\` / \`climbSpeedMultiplier\` | true / 3.0 | Wall and ceiling climbing, and its speed relative to ground movement. |
-| \`snail\` — \`canBreakBlocks\` | true | Whether it chews through obstacles when stuck. |
-| \`snail\` — \`breakSpeedBlocksPerSecond\` | 0.0167 | Block-eat rate (default = one block per minute). |
-| \`snail\` — \`breakBlocksWhitelist\` / \`breakBlocksBlacklist\` | [] / [bedrock, obsidian, end_portal_frame] | If a whitelist is set, only those blocks are eaten; the blacklist always wins. |
-| \`snail\` — \`stuckBreakAfterTicks\` | 1200 | How long (in ticks) it must make no progress before it starts chewing. |
-| \`snail\` — \`chunkForceRadius\` | 1 | Radius of chunks kept loaded around it. |
-| \`starter\` — \`giveStarterShulker\`, \`includeFoodInStarter\`, \`includeBasicMaterials\` | true | Toggles for the starter kit's parts. |
-| \`starter\` — \`bargainShulkerCount\` / \`bargainShulkerSize\` | 2 / 27 | How many choice shulkers, and their slot count. |
-| \`death\` — \`banOnSnailKill\` | true | Whether a catch bans the player. |
-| \`death\` — \`banMessage\` | "The snail caught you." | The ban reason and disconnect message. |
-| \`death\` — \`totemsWorkAgainstSnail\` | true | Whether Totems of Undying can save the target from the snail. |
-| \`commandAllowedPlayers\` | [] | Non-ops allowed to use \`/snail\` commands. |
+| Section / Key | Default | Description |
+| --- | --- | --- |
+| `snail`: `minDistance` / `maxDistance` | 5000 / 50000 | Spawn distance range from world origin. |
+| `snail`: `speedBlocksPerMinute` | 1.0 | Base ground movement speed. |
+| `snail`: `canClimbWalls` / `climbSpeedMultiplier` | true / 3.0 | Wall/ceiling climbing toggle and speed multiplier relative to ground speed. |
+| `snail`: `canBreakBlocks` | true | Toggles whether the snail chews through terrain when blocked. |
+| `snail`: `breakSpeedBlocksPerSecond` | 0.0167 | Block destruction rate (defaults to one block per minute). |
+| `snail`: `breakBlocksWhitelist` / `breakBlocksBlacklist` | [] / [bedrock, obsidian, end_portal_frame] | Allowed and blocked terrain destruction lists. If a whitelist is set, only listed blocks can be broken; the blacklist overrides whitelist settings. |
+| `snail`: `stuckBreakAfterTicks` | 1200 | Idle duration (in ticks) before block destruction begins. |
+| `snail`: `chunkForceRadius` | 1 | Radius of loaded chunks maintained around the snail. |
+| `starter`: `giveStarterShulker`, `includeFoodInStarter`, `includeBasicMaterials` | true | Toggles for individual components of the starter kit. |
+| `starter`: `bargainShulkerCount` / `bargainShulkerSize` | 2 / 27 | Number of custom reward shulker boxes and their inventory slot size. |
+| `death`: `banOnSnailKill` | true | Determines if dying to the snail results in a server ban. |
+| `death`: `banMessage` | "The snail caught you." | The kick/ban screen message displayed to banned players. |
+| `death`: `totemsWorkAgainstSnail` | true | Controls whether Totems of Undying protect players against snail damage. |
+| `commandAllowedPlayers` | [] | List of non-operator players permitted to run `/snail` commands. |
 
 ## Compatibility and requirements
 
-The mod adds one entity, one menu, and three packets; it doesn't modify worldgen or vanilla behaviors beyond the bargain itself. **Dependencies:** Fabric Loader (≥ 0.19.0 on 26.2), Fabric API, and Cloth Config. **JEI is optional** — without it, the picker still shows every item; with it, you additionally get ghost-ingredient drag-and-drop. Both the client and the server need the mod installed so the bargain screen can render.
+This mod adds one entity, one custom screen, and three network packets without modifying world generation or base game logic outside of the initial bargain prompt.
+
+* **Dependencies:** Fabric Loader (≥ 0.19.0 on 26.2), Fabric API, and Cloth Config.
+* **JEI Integration:** Optional. The item selection window works without JEI, but installing JEI allows drag-and-drop item selection directly into bargain slots.
+* **Installation:** Required on both the server and all connecting clients to render the custom menu.
