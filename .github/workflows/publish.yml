@@ -73,6 +73,12 @@ jobs:
       - name: Verify jar exists
         run: test -f "${{ matrix.dir }}/build/libs/immortalsnail-${MOD_VERSION}.jar"
 
+      # Both versions share the same jar name; tag the MC version into the
+      # file name so assets never clash on the shared GitHub release.
+      - name: Make MC-version-tagged jar copy
+        run: |
+          cp "${{ matrix.dir }}/build/libs/immortalsnail-${MOD_VERSION}.jar" "${{ matrix.dir }}/build/libs/immortalsnail-${MOD_VERSION}+mc${{ matrix.mc }}.jar"
+
       - name: Publish to Modrinth / CurseForge / GitHub
         uses: Kira-NT/mc-publish@v3
         with:
@@ -84,9 +90,10 @@ jobs:
 
           github-tag: ${{ inputs.version-tag || github.ref_name }}
 
-          # All jars from the build, minus dev/sources/javadoc artifacts.
+          # Only the MC-version-tagged copy (wildcard glob; 'mc' never
+          # appears in -sources/-dev artifact names).
           files: |
-            ${{ matrix.dir }}/build/libs/!(*-@(dev|sources|javadoc)).jar
+            ${{ matrix.dir }}/build/libs/immortalsnail-*mc*.jar
 
           name: Immortal Snail ${{ env.MOD_VERSION }} for Minecraft ${{ matrix.mc }}
           version: ${{ env.MOD_VERSION }}+mc${{ matrix.mc }}
